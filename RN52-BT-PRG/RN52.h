@@ -2,7 +2,7 @@
 #ifndef _RN52_
 #define _RN52_
 #define SERIAL_BUFFER_SIZE      512     //Buffer size for comms with RN52
-#define BAUDRATE                9600    //RN52 is happier with 9600bps instead of default 115200 when controlled by ATMEGA-328
+#define BAUDRATE                9600    //RN52 is happier with 9600bps instead of default 115200bps when controlled by ATMEGA-328
 
 enum action {PlayPause,Previous,Next,Reboot};
 
@@ -33,4 +33,4 @@ public:
 
 extern RN52Class RN52;
 
-#endif /* defined(__SAAB_Sandbox__RN52__) */
+#endif
