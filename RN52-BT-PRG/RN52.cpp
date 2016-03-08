@@ -3,25 +3,31 @@
 #include "RN52.h"
 #include "SoftwareSerial.h"
 
-const int uart_tx_pin = 5; // UART Tx
-const int uart_rx_pin = 6; // UART Rx
-//const int status_pin = 5;
-const int program_pin = 4;
-SoftwareSerial bt_serial =  SoftwareSerial(uart_rx_pin, uart_tx_pin);
+/**
+ * Atmel 328 pin definitions:
+ */
+
+const int BT_STATUS_PIN = 3;    // RN52 GPIO2 pin for reading current status of the module
+const int BT_CMD_PIN = 4;       // RN52 GPIO9 pin for enabling command mode
+const int UART_TX_PIN = 5;      // UART Tx
+const int UART_RX_PIN = 6;      // UART Rx
+
+SoftwareSerial bt_serial =  SoftwareSerial(UART_RX_PIN, UART_TX_PIN);
 
 void RN52Class::initialize_atmel_pins() {
-    pinMode(program_pin, OUTPUT);
-    digitalWrite(program_pin, HIGH);
-
+    pinMode(BT_CMD_PIN, OUTPUT);
+    pinMode(A0,OUTPUT);         //  RN52 factory reset pin; needs to be pulled down so it is not left floating
+    digitalWrite(BT_CMD_PIN, HIGH);
+    digitalWrite(A0,LOW);
 }
 
 void RN52Class::connect() {
     bt_serial.begin(BAUDRATE);
-    digitalWrite(program_pin,LOW);
+    digitalWrite(BT_CMD_PIN,LOW);
 }
 
 void RN52Class::disconnect() {
-    digitalWrite(program_pin,HIGH);
+    digitalWrite(BT_CMD_PIN,HIGH);
 }
 
 void RN52Class::write(const char * in_message) {
