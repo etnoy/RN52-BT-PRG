@@ -28,6 +28,7 @@
 // Core library and main()
 #if defined(UDOO_NEO_M4) || defined(UDOO_NEO)
 #warning MAIN_SECTION 35 = UDOO Neo M4
+
 // ============================================================================= UDOO Neo M4 specific
 
 // From UDOO/hardware/solox/1.6.5/cores/arduino/dummy_core.cpp

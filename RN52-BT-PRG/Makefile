@@ -9,7 +9,6 @@
 #
 # Last update: Jul 31, 2015 release 300
 
-
 # Libraries
 # ----------------------------------
 # Declare application Arduino/chipKIT/Digispark/Energia/Maple/Microduino/Teensy/Wiring

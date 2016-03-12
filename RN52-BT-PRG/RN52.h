@@ -21,6 +21,7 @@ public:
     bool read();
     void write(const char * in_message);
     void initialize_atmel_pins();
+    void reset_factory_defaults();
     RN52Class() {
         serial_index = 0;
         end_of_line_received = false;
