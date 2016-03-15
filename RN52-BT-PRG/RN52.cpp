@@ -17,7 +17,7 @@ SoftwareSerial bt_serial =  SoftwareSerial(UART_RX_PIN, UART_TX_PIN);
 
 void RN52Class::initialize_atmel_pins() {
     pinMode(BT_CMD_PIN, OUTPUT);
-    pinMode(BT_FACT_RST_PIN,OUTPUT);
+    pinMode(BT_FACT_RST_PIN,INPUT); // Some REALLY crazy stuff is going on if this pin is set as output and pulled low. Leave it alone! Trust me...
     digitalWrite(BT_CMD_PIN, HIGH);
 }
 
