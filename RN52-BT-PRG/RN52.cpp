@@ -12,13 +12,19 @@ const int BT_CMD_PIN = 4;       // RN52 GPIO9 pin for enabling command mode
 const int BT_FACT_RST_PIN = A0; // RN52 factory reset pin GPIO4;
 const int UART_TX_PIN = 5;      // UART Tx
 const int UART_RX_PIN = 6;      // UART Rx
+const int BT_WAKEUP_PIN = 7;    // Power enable pin on RN52
+const int POWER_SWITCH_PIN = 8; // Pin used as a "switch" for testing of "wakeup" function
 
 SoftwareSerial bt_serial =  SoftwareSerial(UART_RX_PIN, UART_TX_PIN);
 
 void RN52Class::initialize_atmel_pins() {
     pinMode(BT_CMD_PIN, OUTPUT);
     pinMode(BT_FACT_RST_PIN,OUTPUT);
+    pinMode(BT_WAKEUP_PIN,OUTPUT);
+    pinMode(POWER_SWITCH_PIN,OUTPUT);
     digitalWrite(BT_CMD_PIN, HIGH);
+    digitalWrite(BT_WAKEUP_PIN,LOW);
+    digitalWrite(POWER_SWITCH_PIN,LOW);
 }
 
 void RN52Class::connect() {
@@ -64,4 +70,18 @@ bool RN52Class::read() {
         }
     }
     return false;
+}
+
+void RN52Class::wakeup() {
+    Serial.println("Waking up RN52");
+    digitalWrite(BT_WAKEUP_PIN,HIGH);
+}
+
+void RN52Class::check_power_enable() {
+    int power_switch_state = 0;
+    power_switch_state = digitalRead(POWER_SWITCH_PIN);
+    if ((power_switch_state == 1) && (bt_up == false)) {
+        wakeup();
+        bt_up = true;
+    }
 }

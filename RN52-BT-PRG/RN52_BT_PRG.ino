@@ -21,7 +21,7 @@ RN52Class RN52;
 void setup() {
     RN52.initialize_atmel_pins();
     Serial.begin(BAUDRATE);
-    RN52.reset_factory_defaults();
+//    RN52.reset_factory_defaults();
     RN52.connect();
     Serial.println("RN52 programming mode");
 }
@@ -38,4 +38,5 @@ void loop() {
     if (RN52.read()) {
         Serial.println(RN52.in_buffer);
     }
+    RN52.check_power_enable();
 }
