@@ -16,6 +16,7 @@ class RN52Class
     bool end_of_line_received;
 public:
     char in_buffer[SERIAL_BUFFER_SIZE];
+    void wakeup();
     void connect();
     void disconnect();
     bool read();
