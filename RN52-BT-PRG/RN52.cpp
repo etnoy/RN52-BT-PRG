@@ -20,7 +20,7 @@ void RN52Class::initialize_atmel_pins() {
     pinMode(BT_CMD_PIN,OUTPUT);
     pinMode(BT_FACT_RST_PIN,INPUT); // Some REALLY crazy stuff is going on if this pin is set as output and pulled low. Leave it alone! Trust me...
     pinMode(BT_PWREN_PIN,OUTPUT);
-    digitalWrite(BT_PWREN_PIN,HIGH);
+//    digitalWrite(BT_PWREN_PIN,HIGH);
     digitalWrite(BT_CMD_PIN,HIGH);
 }
 
