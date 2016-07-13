@@ -3,12 +3,12 @@
 # ----------------------------------
 # Embedded Computing on Xcode
 #
-# Copyright © Rei VILO, 2010-2015
+# Copyright © Rei VILO, 2010-2016
 # http://embedxcode.weebly.com
 # All rights reserved
 #
 #
-# Last update: Jul 09, 2014 release 300
+# Last update: Mar 28, 2015 release 4.4.2
 
 
 
@@ -34,7 +34,7 @@ else ifneq ($(findstring ADAFRUIT,$(GCC_PREPROCESSOR_DEFINITIONS)),)
 
 else
     PLATFORM         := Arduino
-    PLATFORM_TAG      = ARDUINO=$(ARDUINO_RELEASE) ARDUINO_ARCH_AVR EMBEDXCODE=$(RELEASE_NOW) ARDUINO_$(ARDUINO_NAME)
+    PLATFORM_TAG      = ARDUINO=10608 ARDUINO_ARCH_AVR EMBEDXCODE=$(RELEASE_NOW) ARDUINO_$(ARDUINO_NAME)
     APPLICATION_PATH := $(ARDUINO_PATH)
     BOARDS_TXT       := $(APPLICATION_PATH)/hardware/arduino/avr/boards.txt
 endif
@@ -119,13 +119,13 @@ AVRDUDE_COM_OPTS  = -D -p$(MCU) -C$(AVRDUDE_CONF)
 
 ifneq ($(BOARD_TAG1),)
 # Adafruit Pro Trinket uses arduino:eightanaloginputs
-    a1510        = $(call PARSE_BOARD,$(BOARD_TAG1),build.variant)
-    VARIANT      = $(patsubst arduino:%,%,$(a1510))
+    avr165_10    = $(call PARSE_BOARD,$(BOARD_TAG1),build.variant)
+    VARIANT      = $(patsubst arduino:%,%,$(avr165_10))
     VARIANT_PATH = $(APPLICATION_PATH)/hardware/arduino/avr/variants/$(VARIANT)
 else
 # Adafruit Pro Trinket uses arduino:eightanaloginputs
-    a1510        = $(call PARSE_BOARD,$(BOARD_TAG),build.variant)
-    VARIANT      = $(patsubst arduino:%,%,$(a1510))
+    avr165_10        = $(call PARSE_BOARD,$(BOARD_TAG),build.variant)
+    VARIANT      = $(patsubst arduino:%,%,$(avr165_10))
     VARIANT_PATH = $(APPLICATION_PATH)/hardware/arduino/avr/variants/$(VARIANT)
 endif
 
@@ -135,14 +135,16 @@ endif
 APP_LIB_PATH     = $(APPLICATION_PATH)/libraries
 APP_LIB_PATH    += $(APPLICATION_PATH)/hardware/arduino/$(BUILD_CORE)/libraries
 
-a1520    = $(foreach dir,$(APP_LIB_PATH),$(patsubst %,$(dir)/%,$(APP_LIBS_LIST)))
-a1520   += $(foreach dir,$(APP_LIB_PATH),$(patsubst %,$(dir)/%/utility,$(APP_LIBS_LIST)))
-a1520   += $(foreach dir,$(APP_LIB_PATH),$(patsubst %,$(dir)/%/src,$(APP_LIBS_LIST)))
-a1520   += $(foreach dir,$(APP_LIB_PATH),$(patsubst %,$(dir)/%/src/utility,$(APP_LIBS_LIST)))
-a1520   += $(foreach dir,$(APP_LIB_PATH),$(patsubst %,$(dir)/%/src/arch/$(BUILD_CORE),$(APP_LIBS_LIST)))
+avr165_20    = $(foreach dir,$(APP_LIB_PATH),$(patsubst %,$(dir)/%,$(APP_LIBS_LIST)))
+avr165_20   += $(foreach dir,$(APP_LIB_PATH),$(patsubst %,$(dir)/%/utility,$(APP_LIBS_LIST)))
+avr165_20   += $(foreach dir,$(APP_LIB_PATH),$(patsubst %,$(dir)/%/src,$(APP_LIBS_LIST)))
+avr165_20   += $(foreach dir,$(APP_LIB_PATH),$(patsubst %,$(dir)/%/src/utility,$(APP_LIBS_LIST)))
+avr165_20   += $(foreach dir,$(APP_LIB_PATH),$(patsubst %,$(dir)/%/src/arch/$(BUILD_CORE),$(APP_LIBS_LIST)))
+avr165_20   += $(foreach dir,$(APP_LIB_PATH),$(patsubst %,$(dir)/%/src/$(BUILD_CORE),$(APP_LIBS_LIST)))
 
-APP_LIB_CPP_SRC = $(foreach dir,$(a1520),$(wildcard $(dir)/*.cpp)) # */
-APP_LIB_C_SRC   = $(foreach dir,$(a1520),$(wildcard $(dir)/*.c)) # */
+APP_LIB_CPP_SRC = $(foreach dir,$(avr165_20),$(wildcard $(dir)/*.cpp)) # */
+APP_LIB_C_SRC   = $(foreach dir,$(avr165_20),$(wildcard $(dir)/*.c)) # */
+APP_LIB_H_SRC   = $(foreach dir,$(avr165_20),$(wildcard $(dir)/*.h)) # */
 
 APP_LIB_OBJS     = $(patsubst $(APPLICATION_PATH)/%.cpp,$(OBJDIR)/%.cpp.o,$(APP_LIB_CPP_SRC))
 APP_LIB_OBJS    += $(patsubst $(APPLICATION_PATH)/%.c,$(OBJDIR)/%.c.o,$(APP_LIB_C_SRC))
@@ -161,7 +163,7 @@ USB_PRODUCT := $(call PARSE_BOARD,$(BOARD_TAG),build.usb_product)
 ifneq ($(USB_VID),)
 USB_FLAGS    = -DUSB_VID=$(USB_VID)
 USB_FLAGS   += -DUSB_PID=$(USB_PID)
-USB_FLAGS   += -DUSBCON
+#USB_FLAGS   += -DUSBCON
 USB_FLAGS   += -DUSB_MANUFACTURER=''
 USB_FLAGS   += -DUSB_PRODUCT='$(USB_PRODUCT)'
 endif
@@ -176,8 +178,7 @@ endif
 
 
 INCLUDE_PATH    = $(CORE_LIB_PATH) $(APP_LIB_PATH) $(VARIANT_PATH)
-INCLUDE_PATH   += $(sort $(dir $(APP_LIB_CPP_SRC) $(APP_LIB_C_SRC)))
-INCLUDE_PATH   += $(sort $(dir $(BUILD_APP_LIB_CPP_SRC) $(BUILD_APP_LIB_C_SRC)))
+INCLUDE_PATH   += $(sort $(dir $(APP_LIB_CPP_SRC) $(APP_LIB_C_SRC) $(APP_LIB_H_SRC)))
 INCLUDE_PATH   += $(sort $(dir $(BUILD_APP_LIB_CPP_SRC) $(BUILD_APP_LIB_C_SRC)))
 
 
@@ -188,7 +189,7 @@ INCLUDE_PATH   += $(sort $(dir $(BUILD_APP_LIB_CPP_SRC) $(BUILD_APP_LIB_C_SRC)))
 #
 CPPFLAGS     = $(OPTIMISATION) $(WARNING_FLAGS)
 CPPFLAGS    += -$(MCU_FLAG_NAME)=$(MCU) -DF_CPU=$(F_CPU)
-CPPFLAGS    += -ffunction-sections	-fdata-sections
+CPPFLAGS    += -ffunction-sections -fdata-sections
 CPPFLAGS    += $(addprefix -D, printf=iprintf $(PLATFORM_TAG))
 CPPFLAGS    += $(addprefix -I, $(INCLUDE_PATH))
 
@@ -200,7 +201,7 @@ CFLAGS       =
 # Specific CXXFLAGS for g++ only
 # g++ uses CPPFLAGS and CXXFLAGS
 #
-CXXFLAGS     = -fdata-sections -fno-threadsafe-statics
+CXXFLAGS     = -fdata-sections -fno-threadsafe-statics -std=gnu++11 -fno-exceptions
 
 # Specific ASFLAGS for gcc assembler only
 # gcc assembler uses CPPFLAGS and ASFLAGS

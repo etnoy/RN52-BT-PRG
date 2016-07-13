@@ -3,12 +3,12 @@
 # ----------------------------------
 # Embedded Computing on Xcode
 #
-# Copyright © Rei VILO, 2010-2015
+# Copyright © Rei VILO, 2010-2016
 # http://embedxcode.weebly.com
 # All rights reserved
 #
 #
-# Last update: Oct 31, 2015 release 4.0.0
+# Last update: Jan 16, 2016 release 4.1.7
 
 
 
@@ -23,14 +23,14 @@ APPLICATION_PATH := $(ESP8266_PATH)
 PLATFORM_VERSION := $(ESP8266_RELEASE) for Arduino $(ARDUINO_CC_RELEASE)
 
 HARDWARE_PATH     = $(APPLICATION_PATH)/hardware/esp8266/$(ESP8266_RELEASE)
-TOOL_CHAIN_PATH   = $(APPLICATION_PATH)/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9
+TOOL_CHAIN_PATH   = $(APPLICATION_PATH)/tools/xtensa-lx106-elf-gcc/$(EXTENSA_RELEASE)
 OTHER_TOOLS_PATH  = $(APPLICATION_PATH)/tools
 
 BOARDS_TXT      := $(HARDWARE_PATH)/boards.txt
 BUILD_CORE       = $(call PARSE_BOARD,$(BOARD_TAG),build.core)
 BUILD_BOARD      = ARDUINO_$(call PARSE_BOARD,$(BOARD_TAG),build.board)
 
-ESP_POST_COMPILE   = $(APPLICATION_PATH)/tools/esptool/0.4.5/esptool
+ESP_POST_COMPILE   = $(APPLICATION_PATH)/tools/esptool/$(ESPTOOLS_RELEASE)/esptool
 BOOTLOADER_ELF     = $(HARDWARE_PATH)/bootloaders/eboot/eboot.elf
 
 # Complicated menu system for Arduino 1.5
@@ -40,7 +40,9 @@ BOARD_TAGS_LIST   = $(BOARD_TAG) $(BOARD_TAG1) $(BOARD_TAG2)
 
 SEARCH_FOR  = $(strip $(foreach t,$(1),$(call PARSE_BOARD,$(t),$(2))))
 
-BUILD_FLASH_SIZE   = $(call SEARCH_FOR,$(BOARD_TAGS_LIST),build.flash_size)
+# flash_size is defined twice for nodemcu and nodemcuv2, take first
+#
+BUILD_FLASH_SIZE   = $(firstword $(call SEARCH_FOR,$(BOARD_TAGS_LIST),build.flash_size))
 BUILD_FLASH_FREQ   = $(call SEARCH_FOR,$(BOARD_TAGS_LIST),build.flash_freq)
 
 #ifeq ($(UPLOADER),esptool.py)
@@ -49,7 +51,7 @@ BUILD_FLASH_FREQ   = $(call SEARCH_FOR,$(BOARD_TAGS_LIST),build.flash_freq)
 #    UPLOADER_OPTS       = --baud $(call PARSE_BOARD,$(BOARD_TAG),upload.speed)
 #else
     UPLOADER            = esptool
-    UPLOADER_PATH       = $(OTHER_TOOLS_PATH)/esptool/0.4.5
+    UPLOADER_PATH       = $(OTHER_TOOLS_PATH)/esptool/$(ESPTOOLS_RELEASE)
     UPLOADER_EXEC       = $(UPLOADER_PATH)/esptool
     UPLOADER_OPTS       = -vv -cd $(call PARSE_BOARD,$(BOARD_TAG),upload.resetmethod)
     UPLOADER_OPTS      += -cb $(call PARSE_BOARD,$(BOARD_TAG),upload.speed)
@@ -116,7 +118,7 @@ FIRST_O_IN_A         = $(patsubst $(APPLICATION_PATH)/%,$(OBJDIR)/%,$(esp001))
 #$(eval SDK_VERSION = $(shell cat $(UPLOADER_PATH)/sdk/version))
 #ifeq ($(SDK_VERSION),1.0.0)
 #    BOARD_TAG      := generic
-    L_FLAGS         = -lm -lgcc -lhal -lphy -lnet80211 -llwip -lwpa -lmain -lpp -lsmartconfig
+    L_FLAGS         = -lm -lgcc -lhal -lphy -lnet80211 -llwip -lwpa -lmain -lpp -lsmartconfig -lwps -lcrypto -laxtls
     ADDRESS_BIN1     = 00000
 #    ADDRESS_BIN2    = 40000
 #else
@@ -131,11 +133,11 @@ FIRST_O_IN_A         = $(patsubst $(APPLICATION_PATH)/%,$(OBJDIR)/%,$(esp001))
 # ?ibraries required for libraries and Libraries
 #
 ifeq ($(USER_LIBRARY_DIR)/Arduino15/preferences.txt,)
-    $(error Error: run Arduino or panStamp once and define the sketchbook path)
+    $(error Error: run Arduino once and define the sketchbook path)
 endif
 
 ifeq ($(wildcard $(SKETCHBOOK_DIR)),)
-    SKETCHBOOK_DIR = $(shell grep sketchbook.path $(wildcard ~/Library/Arduino/preferences.txt) | cut -d = -f 2)
+    SKETCHBOOK_DIR = $(shell grep sketchbook.path $(wildcard ~/Library/Arduino15/preferences.txt) | cut -d = -f 2)
 endif
 
 ifeq ($(wildcard $(SKETCHBOOK_DIR)),)
@@ -214,7 +216,7 @@ LDFLAGS     += -nostdlib -Wl,--no-check-sections -u call_user_start -Wl,-static
 LDFLAGS     += -L$(HARDWARE_PATH)/tools/sdk/lib
 LDFLAGS     += -L$(HARDWARE_PATH)/tools/sdk/ld
 LDFLAGS     += -T $(LDSCRIPT)
-LDFLAGS     += -Wl,-wrap,system_restart_local
+LDFLAGS     += -Wl,-wrap,system_restart_local -Wl,-wrap,register_chipv6_phy
 
 
 # Specific OBJCOPYFLAGS for objcopy only

@@ -3,12 +3,12 @@
 # ----------------------------------
 # Embedded Computing on Xcode
 #
-# Copyright © Rei VILO, 2010-2015
+# Copyright © Rei VILO, 2010-2016
 # http://embedxcode.weebly.com
 # All rights reserved
 #
 #
-# Last update: Oct 31, 2015 release 4.0.0
+# Last update: Jan 16, 2016 release 4.1.7
 
 
 include $(MAKEFILE_PATH)/About.mk
@@ -22,8 +22,12 @@ APPLICATION_PATH := $(PANSTAMP_AVR_PATH)
 PLATFORM_VERSION := AVR $(PANSTAMP_AVR_RELEASE) for Arduino $(ARDUINO_CC_RELEASE)
 
 HARDWARE_PATH     = $(APPLICATION_PATH)/hardware/avr/$(PANSTAMP_AVR_RELEASE)
-TOOL_CHAIN_PATH   = $(ARDUINO_PATH)/hardware/tools/avr
-OTHER_TOOLS_PATH  = $(ARDUINO_PATH)/hardware/tools/avr
+#TOOL_CHAIN_PATH   = $(ARDUINO_PATH)/hardware/tools/avr
+#OTHER_TOOLS_PATH  = $(ARDUINO_PATH)/hardware/tools/avr
+TOOL_CHAIN_PATH   = $(PANSTAMP_AVR_PATH)/tools/avr-gcc/$(AVR_GCC_RELEASE)
+OTHER_TOOLS_PATH  = $(PANSTAMP_AVR_PATH)/tools/avrdude/$(AVRDUDE_RELEASE)
+
+AVRDUDE_PATH         = $(OTHER_TOOLS_PATH)
 
 BUILD_CORE       = avr
 BOARDS_TXT      := $(HARDWARE_PATH)/boards.txt
@@ -57,10 +61,12 @@ p1000   += $(foreach dir,$(APP_LIB_PATH),$(patsubst %,$(dir)/%/utility,$(APP_LIB
 p1000   += $(foreach dir,$(APP_LIB_PATH),$(patsubst %,$(dir)/%/src,$(APP_LIBS_LIST)))
 p1000   += $(foreach dir,$(APP_LIB_PATH),$(patsubst %,$(dir)/%/src/utility,$(APP_LIBS_LIST)))
 p1000   += $(foreach dir,$(APP_LIB_PATH),$(patsubst %,$(dir)/%/src/arch/$(BUILD_CORE),$(APP_LIBS_LIST)))
+p1000   += $(foreach dir,$(APP_LIB_PATH),$(patsubst %,$(dir)/%/src/$(BUILD_CORE),$(APP_LIBS_LIST)))
 
 APP_LIB_CPP_SRC = $(foreach dir,$(p1000),$(wildcard $(dir)/*.cpp)) # */
 APP_LIB_C_SRC   = $(foreach dir,$(p1000),$(wildcard $(dir)/*.c)) # */
 APP_LIB_S_SRC   = $(foreach dir,$(p1000),$(wildcard $(dir)/*.S)) # */
+APP_LIB_H_SRC   = $(foreach dir,$(p1000),$(wildcard $(dir)/*.h)) # */
 
 APP_LIB_OBJS     = $(patsubst $(APPLICATION_PATH)/%.cpp,$(OBJDIR)/%.cpp.o,$(APP_LIB_CPP_SRC))
 APP_LIB_OBJS    += $(patsubst $(APPLICATION_PATH)/%.c,$(OBJDIR)/%.c.o,$(APP_LIB_C_SRC))
@@ -78,6 +84,7 @@ p1100   += $(foreach dir,$(BUILD_APP_LIB_PATH),$(patsubst %,$(dir)/%/src/arch/$(
 BUILD_APP_LIB_CPP_SRC = $(foreach dir,$(p1100),$(wildcard $(dir)/*.cpp)) # */
 BUILD_APP_LIB_C_SRC   = $(foreach dir,$(p1100),$(wildcard $(dir)/*.c)) # */
 BUILD_APP_LIB_S_SRC   = $(foreach dir,$(p1100),$(wildcard $(dir)/*.S)) # */
+BUILD_APP_LIB_H_SRC   = $(foreach dir,$(p1100),$(wildcard $(dir)/*.h)) # */
 
 BUILD_APP_LIB_OBJS     = $(patsubst $(HARDWARE_PATH)/%.cpp,$(OBJDIR)/%.cpp.o,$(BUILD_APP_LIB_CPP_SRC))
 BUILD_APP_LIB_OBJS    += $(patsubst $(HARDWARE_PATH)/%.c,$(OBJDIR)/%.c.o,$(BUILD_APP_LIB_C_SRC))
@@ -91,12 +98,12 @@ APP_LIBS_LOCK = 1
 # wildcard required for ~ management
 # ?ibraries required for libraries and Libraries
 #
-ifeq ($(USER_LIBRARY_DIR)/Arduino/preferences.txt,)
-    $(error Error: run Arduino or panStamp once and define the sketchbook path)
+ifeq ($(USER_LIBRARY_DIR)/Arduino15/preferences.txt,)
+    $(error Error: run Arduino once and define the sketchbook path)
 endif
 
 ifeq ($(wildcard $(SKETCHBOOK_DIR)),)
-    SKETCHBOOK_DIR = $(shell grep sketchbook.path $(wildcard ~/Library/Arduino/preferences.txt) | cut -d = -f 2)
+    SKETCHBOOK_DIR = $(shell grep sketchbook.path $(wildcard ~/Library/Arduino15/preferences.txt) | cut -d = -f 2)
 endif
 
 ifeq ($(wildcard $(SKETCHBOOK_DIR)),)
@@ -131,8 +138,8 @@ F_CPU           = $(call PARSE_BOARD,$(BOARD_TAG),build.f_cpu)
 OPTIMISATION    = -Os
 
 INCLUDE_PATH    = $(CORE_LIB_PATH) $(APP_LIB_PATH) $(VARIANT_PATH) $(HARDWARE_PATH)
-INCLUDE_PATH   += $(sort $(dir $(APP_LIB_CPP_SRC) $(APP_LIB_C_SRC)))
-INCLUDE_PATH   += $(sort $(dir $(BUILD_APP_LIB_CPP_SRC) $(BUILD_APP_LIB_C_SRC)))
+INCLUDE_PATH   += $(sort $(dir $(APP_LIB_CPP_SRC) $(APP_LIB_C_SRC) $(APP_LIB_H_SRC)))
+INCLUDE_PATH   += $(sort $(dir $(BUILD_APP_LIB_CPP_SRC) $(BUILD_APP_LIB_C_SRC) $(BUILD_APP_LIB_H_SRC)))
 INCLUDE_PATH   += $(OBJDIR)
 
 
@@ -187,3 +194,4 @@ TARGET_EEP    = $(OBJDIR)/$(TARGET).eep
 # Link command
 #
 COMMAND_LINK = $(CC) $(OUT_PREPOSITION)$@ $(LOCAL_OBJS) $(TARGET_A) -LBuilds $(LDFLAGS)
+

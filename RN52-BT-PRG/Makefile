@@ -9,6 +9,7 @@
 #
 # Last update: Jul 31, 2015 release 300
 
+
 # Libraries
 # ----------------------------------
 # Declare application Arduino/chipKIT/Digispark/Energia/Maple/Microduino/Teensy/Wiring
@@ -76,7 +77,7 @@ CURRENT_DIR   := $(shell echo '$(CURRENT_DIR)' | sed 's/ /\\\ /g')
 
 # C-compliant project name
 #
-PROJECT_NAME_AS_IDENTIFIER = RN52_BT_PRG
+PROJECT_NAME_AS_IDENTIFIER = Temp
 SKETCH_EXTENSION = ino
 
 MAKEFILE_PATH  = $(CURRENT_DIR)/Makefiles

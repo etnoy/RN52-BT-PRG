@@ -3,12 +3,12 @@
 # ----------------------------------
 # Embedded Computing on Xcode
 #
-# Copyright © Rei VILO, 2010-2015
+# Copyright © Rei VILO, 2010-2016
 # http://embedxcode.weebly.com
 # All rights reserved
 #
 #
-# Last update: Nov 05, 2014 release 4.0.1
+# Last update: Mar 07, 2016 release 4.3.9
 
 
 
@@ -20,7 +20,7 @@ include $(MAKEFILE_PATH)/About.mk
 #
 PLATFORM         := Arduino
 BUILD_CORE       := sam
-PLATFORM_TAG      = ARDUINO=$(ARDUINO_RELEASE) ARDUINO_ARCH_SAM EMBEDXCODE=$(RELEASE_NOW) ARDUINO_$(BOARD_NAME) $(filter __%__ ,$(GCC_PREPROCESSOR_DEFINITIONS))
+PLATFORM_TAG      = ARDUINO=10607 ARDUINO_ARCH_SAM EMBEDXCODE=$(RELEASE_NOW) ARDUINO_$(BOARD_NAME) $(filter __%__ ,$(GCC_PREPROCESSOR_DEFINITIONS))
 APPLICATION_PATH := $(ARDUINO_PATH)
 PLATFORM_VERSION := SAM $(ARDUINO_SAM_RELEASE) for Arduino $(ARDUINO_CC_RELEASE)
 
@@ -44,7 +44,8 @@ APP_LIB_PATH     := $(HARDWARE_PATH)/libraries
 BOARDS_TXT       := $(HARDWARE_PATH)/boards.txt
 BOARD_NAME        = $(call PARSE_BOARD,$(BOARD_TAG),build.board)
 
-FIRST_O_IN_A     = $$(find . -name variant.cpp.o)
+FIRST_O_IN_A     = $$(find . -name \*.S.o)
+#FIRST_O_IN_A     = $$(find . -name variant.cpp.o)
 #FIRST_O_IN_A     = $(filter %/variant.cpp.o,$(BUILD_CORE_OBJS))
 
 VARIANT             = $(call PARSE_BOARD,$(BOARD_TAG),build.variant)
@@ -60,7 +61,7 @@ VARIANT_OBJS        = $(patsubst $(HARDWARE_PATH)/%,$(OBJDIR)/%,$(VARIANT_OBJ_FI
 # Tested by Mike Roberts
 #
 UPLOADER          = bossac
-UPLOADER_PATH     = $(OTHER_TOOLS_PATH)/bossac/1.6-arduino
+UPLOADER_PATH     = $(OTHER_TOOLS_PATH)/bossac/$(BOSSAC_RELEASE)
 UPLOADER_EXEC     = $(UPLOADER_PATH)/bossac
 UPLOADER_PORT     = $(subst /dev/,,$(AVRDUDE_PORT))
 UPLOADER_OPTS     = -i -d --port=$(UPLOADER_PORT) -U $(call PARSE_BOARD,$(BOARD_TAG),upload.native_usb) -e -w -v -b
@@ -113,26 +114,29 @@ SYSTEM_OBJS = $(SYSTEM_PATH)/$(SYSTEM_LIB)
 #
 APP_LIB_PATH     = $(HARDWARE_PATH)/libraries
 
-a1500    = $(foreach dir,$(APP_LIB_PATH),$(patsubst %,$(dir)/%,$(APP_LIBS_LIST)))
-a1500   += $(foreach dir,$(APP_LIB_PATH),$(patsubst %,$(dir)/%/utility,$(APP_LIBS_LIST)))
-a1500   += $(foreach dir,$(APP_LIB_PATH),$(patsubst %,$(dir)/%/src,$(APP_LIBS_LIST)))
-a1500   += $(foreach dir,$(APP_LIB_PATH),$(patsubst %,$(dir)/%/src/arch/$(BUILD_CORE),$(APP_LIBS_LIST)))
+sam165_00    = $(foreach dir,$(APP_LIB_PATH),$(patsubst %,$(dir)/%,$(APP_LIBS_LIST)))
+sam165_00   += $(foreach dir,$(APP_LIB_PATH),$(patsubst %,$(dir)/%/utility,$(APP_LIBS_LIST)))
+sam165_00   += $(foreach dir,$(APP_LIB_PATH),$(patsubst %,$(dir)/%/src,$(APP_LIBS_LIST)))
+sam165_00   += $(foreach dir,$(APP_LIB_PATH),$(patsubst %,$(dir)/%/src/arch/$(BUILD_CORE),$(APP_LIBS_LIST)))
+sam165_00   += $(foreach dir,$(APP_LIB_PATH),$(patsubst %,$(dir)/%/src/$(BUILD_CORE),$(APP_LIBS_LIST)))
 
-APP_LIB_CPP_SRC = $(foreach dir,$(a1500),$(wildcard $(dir)/*.cpp)) # */
-APP_LIB_C_SRC   = $(foreach dir,$(a1500),$(wildcard $(dir)/*.c)) # */
+APP_LIB_CPP_SRC = $(foreach dir,$(sam165_00),$(wildcard $(dir)/*.cpp)) # */
+APP_LIB_C_SRC   = $(foreach dir,$(sam165_00),$(wildcard $(dir)/*.c)) # */
+APP_LIB_H_SRC   = $(foreach dir,$(sam165_00),$(wildcard $(dir)/*.h)) # */
 
 APP_LIB_OBJS     = $(patsubst $(HARDWARE_PATH)/%.cpp,$(OBJDIR)/%.cpp.o,$(APP_LIB_CPP_SRC))
 APP_LIB_OBJS    += $(patsubst $(HARDWARE_PATH)/%.c,$(OBJDIR)/%.c.o,$(APP_LIB_C_SRC))
 
 BUILD_APP_LIB_PATH     = $(APPLICATION_PATH)/libraries
 
-a1510    = $(foreach dir,$(BUILD_APP_LIB_PATH),$(patsubst %,$(dir)/%,$(APP_LIBS_LIST)))
-a1510   += $(foreach dir,$(BUILD_APP_LIB_PATH),$(patsubst %,$(dir)/%/utility,$(APP_LIBS_LIST)))
-a1510   += $(foreach dir,$(BUILD_APP_LIB_PATH),$(patsubst %,$(dir)/%/src,$(APP_LIBS_LIST)))
-a1510   += $(foreach dir,$(BUILD_APP_LIB_PATH),$(patsubst %,$(dir)/%/src/arch/$(BUILD_CORE),$(APP_LIBS_LIST)))
+sam165_10    = $(foreach dir,$(BUILD_APP_LIB_PATH),$(patsubst %,$(dir)/%,$(APP_LIBS_LIST)))
+sam165_10   += $(foreach dir,$(BUILD_APP_LIB_PATH),$(patsubst %,$(dir)/%/utility,$(APP_LIBS_LIST)))
+sam165_10   += $(foreach dir,$(BUILD_APP_LIB_PATH),$(patsubst %,$(dir)/%/src,$(APP_LIBS_LIST)))
+sam165_10   += $(foreach dir,$(BUILD_APP_LIB_PATH),$(patsubst %,$(dir)/%/src/arch/$(BUILD_CORE),$(APP_LIBS_LIST)))
 
-BUILD_APP_LIB_CPP_SRC = $(foreach dir,$(a1510),$(wildcard $(dir)/*.cpp)) # */
-BUILD_APP_LIB_C_SRC   = $(foreach dir,$(a1510),$(wildcard $(dir)/*.c)) # */
+BUILD_APP_LIB_CPP_SRC = $(foreach dir,$(sam165_10),$(wildcard $(dir)/*.cpp)) # */
+BUILD_APP_LIB_C_SRC   = $(foreach dir,$(sam165_10),$(wildcard $(dir)/*.c)) # */
+BUILD_APP_LIB_H_SRC   = $(foreach dir,$(sam165_10),$(wildcard $(dir)/*.h)) # */
 
 BUILD_APP_LIB_OBJS     = $(patsubst $(APPLICATION_PATH)/%.cpp,$(OBJDIR)/%.cpp.o,$(BUILD_APP_LIB_CPP_SRC))
 BUILD_APP_LIB_OBJS    += $(patsubst $(APPLICATION_PATH)/%.c,$(OBJDIR)/%.c.o,$(BUILD_APP_LIB_C_SRC))
@@ -141,8 +145,10 @@ APP_LIBS_LOCK = 1
 
 CORE_C_SRCS     = $(wildcard $(CORE_LIB_PATH)/*.c $(CORE_LIB_PATH)/*/*.c) # */
 
-a1520              = $(filter-out %main.cpp, $(wildcard $(CORE_LIB_PATH)/*.cpp $(CORE_LIB_PATH)/*/*.cpp $(CORE_LIB_PATH)/*/*/*.cpp $(CORE_LIB_PATH)/*/*/*/*.cpp)) # */
-CORE_CPP_SRCS     = $(filter-out %/$(EXCLUDE_LIST),$(a1520))
+sam165_20              = $(filter-out %main.cpp, $(wildcard $(CORE_LIB_PATH)/*.cpp $(CORE_LIB_PATH)/*/*.cpp $(CORE_LIB_PATH)/*/*/*.cpp $(CORE_LIB_PATH)/*/*/*/*.cpp)) # */
+CORE_CPP_SRCS     = $(filter-out %/$(EXCLUDE_LIST),$(sam165_20))
+
+CORE_AS_SRCS      = $(wildcard $(CORE_LIB_PATH)/*.S) # */
 CORE_AS1_SRCS_OBJ = $(patsubst %.S,%.S.o,$(filter %S, $(CORE_AS_SRCS)))
 CORE_AS2_SRCS_OBJ = $(patsubst %.s,%.s.o,$(filter %s, $(CORE_AS_SRCS)))
 
@@ -179,8 +185,8 @@ USB_RESET  = python $(UTILITIES_PATH)/reset_1200.py
     OPTIMISATION   = -Os
 
 INCLUDE_PATH    = $(CORE_LIB_PATH) $(APP_LIB_PATH) $(VARIANT_PATH)
-INCLUDE_PATH   += $(sort $(dir $(APP_LIB_CPP_SRC) $(APP_LIB_C_SRC)))
-INCLUDE_PATH   += $(sort $(dir $(BUILD_APP_LIB_CPP_SRC) $(BUILD_APP_LIB_C_SRC)))
+INCLUDE_PATH   += $(sort $(dir $(APP_LIB_CPP_SRC) $(APP_LIB_C_SRC) $(APP_LIB_H_SRC)))
+INCLUDE_PATH   += $(sort $(dir $(BUILD_APP_LIB_CPP_SRC) $(BUILD_APP_LIB_C_SRC) $(BUILD_APP_LIB_H_SRC)))
 INCLUDE_PATH   += $(HARDWARE_PATH)/system
 INCLUDE_PATH   += $(HARDWARE_PATH)/system/libsam
 #INCLUDE_PATH   += $(HARDWARE_PATH)/system/libsam/include
@@ -203,12 +209,12 @@ CPPFLAGS    += $(addprefix -I, $(INCLUDE_PATH))
 # Specific CFLAGS for gcc only
 # gcc uses CPPFLAGS and CFLAGS
 #
-CFLAGS       =
+CFLAGS       = -std=gnu11
 
 # Specific CXXFLAGS for g++ only
 # g++ uses CPPFLAGS and CXXFLAGS
 #
-CXXFLAGS     = -fno-rtti -fno-exceptions
+CXXFLAGS     = -fno-rtti -fno-exceptions -fno-threadsafe-statics -std=gnu++11
 
 # Specific ASFLAGS for gcc assembler only
 # gcc assembler uses CPPFLAGS and ASFLAGS
@@ -221,10 +227,10 @@ ASFLAGS      = -x assembler-with-cpp
 LDFLAGS      = $(OPTIMISATION) $(WARNING_FLAGS)
 LDFLAGS     += -$(MCU_FLAG_NAME)=$(MCU)
 LDFLAGS     += -T $(VARIANT_PATH)/$(LDSCRIPT) -mthumb
-LDFLAGS     += -Wl,-Map,Builds/embeddedcomputing.map $(VARIANT_OBJS)
-LDFLAGS     += -lgcc -mthumb -Wl,--cref -Wl,--check-sections -Wl,--gc-sections
+LDFLAGS     += -Wl,-Map,Builds/embeddedcomputing.map
+LDFLAGS     += -mthumb -Wl,--cref -Wl,--check-sections -Wl,--gc-sections
 LDFLAGS     += -Wl,--unresolved-symbols=report-all -Wl,--warn-common -Wl,--warn-section-align
-LDFLAGS     += -Wl,--warn-unresolved-symbols -Wl,--entry=Reset_Handler
+LDFLAGS     += -Wl,--entry=Reset_Handler -Wl,--gc-sections
 #LDFLAGS     += -lm -Wl,--gc-sections,-u,main
 
 # Specific OBJCOPYFLAGS for objcopy only
@@ -238,7 +244,7 @@ OBJCOPYFLAGS  = -v -Obinary
 # Link command
 #
 FIRST_O_IN_LD   = $$(find . -name syscalls_sam3.c.o)
-COMMAND_LINK    = $(CXX) $(LDFLAGS) $(OUT_PREPOSITION)$@ -L$(OBJDIR) -Wl,--start-group $(FIRST_O_IN_LD) $(SYSTEM_OBJS) $(LOCAL_OBJS) $(TARGET_A) -Wl,--end-group -lm -lgcc
+COMMAND_LINK    = $(CC) $(LDFLAGS) $(OUT_PREPOSITION)$@ -L$(OBJDIR) -Wl,--start-group $(FIRST_O_IN_LD) $(SYSTEM_OBJS) $(LOCAL_OBJS) $(TARGET_A) -Wl,--end-group -lm -lgcc
 
 # Upload command
 #
